@@ -1,0 +1,359 @@
+When you search for "google.com"
+the request goes to the ISP.
+The ISP does a DNS lookup from a table for the hostname and matching unique public IP
+The IP address is sent back to ISP and then to our browser.
+Browser then using IP sends a HTTP request (GET, POST, DEL, PUT)
+A GET request is sent to Googles web server
+The web server prepares a response. The index.html file.
+The response doesnt have to be a webpage. It can also be a JSON or XML file.
+
+When we hit `flask run`, it sets up a web server for us at local ip 127.0.0.1 and listens on port 5000
+
+
+-----------------------------------------------
+All comunication between server/server, server/browser, browser/browser are done is Text
+TCP can only send Text
+An image:
+[
+    123 125 185 124
+    145 133 124 129
+]
+unlike a string this needs a fomat like JSON
+{
+  "fields1" : 3, 
+  "field" : "abc", 
+  "boolean" : 1,  
+  "array" : [1,2,3,4, "abc"], 
+  "array of objects" : [ 
+      { 
+          "field1" : 1 
+      },
+      {
+          "field2" : "this is a string"
+      }
+   ],
+  "array of nested arrays" : [
+      {
+          "nested array1": [
+              {
+                  "field1" : 1,
+                  "name" : "thedout"
+              }
+          ]
+      },
+      {
+      
+      }
+  ]
+
+}
+-------------------------------------
+
+Status code
+200 is ok
+404 is not found
+
+REST-ful API 
+Architectural style of builing API
+
+Request
+import numpy as np 
+Response 
+np->eg: np.array()
+RESTful API is an API that supports HTTP requests
+
+POST to create
+PUT to update
+
+Resource: What your offering eg: +,-,*,/
+Method: GET POST PUT DELETE
+Path: Where Resource is located
+used for: Description of what Method is going to do
+Param: The paramaters that the Path is expecting
+on error: the status codes based on user requests 
+
+Resource Method Chart
++ | POST | /add | adding 2 nums | x:int,y:int | 200 ok, 301 missing argument
+- | POST | /subtract | subtracting 2 nums | x:int,y:int | 200 ok, 301 missing argument
+/ | POST | /divide | dividing 2 nums | x:int,y:int | 200 ok, 301 missing argument, 302 y is zero
+* | POST | /multiply | multiply 2 nums | x:int,y:int | 200 ok, 301 missing argument, 302 y is zero
+
+---------------------------------
+You put a docker engine on your OS 
+You describe using an engine for each application the environemnt, dependencies and other instructions
+You can then use the image to generate a container 
+On the server the image is run to generate the container
+Docker compose for when you want to control multiple containers 
+
+Navigate to folder with file
+create a "web" folder for the server or flask app. `mkdir web`
+create a "db" folder for the database. `mkdir db`
+copy the server file into "web" folder. `cp ../app.py`
+in the 'web' folder run run `Docker touch` to make a docker file
+then run `touch requirements.txt` to make requirements.txt file
+`sudo !!` to run previous command with sudo permissions if you need it
+
+In the Docker file
+# A machine running ubuntu with python 3
+FROM python:3
+# Our working directory in /usr/src/app
+WORKDIR /usr/src/app
+# Copy the 'requirements.txt' to the current working directory '.'
+COPY requirements.txt .
+# We tell to ubuntu machine to run pip3 which is included to install,
+# after making sure there is no cache '--no-cache-dir'
+# '-r' is recursive, the 'requirements.txt' file which is flask and flask restful
+RUN pip3 install --no-cache-dir -r requirements.txt
+# Now we copy the current files 'app.py' and 'requirements.txt',
+# into the system into the working directory
+# the first '.' is your code and the second '.' is whats going into the machine 
+COPY . .
+# Now we run python3 asmd.py
+CMD [ "python3", "asmd.py" ]
+# we now specify the requirements 'Flask' and 'flast_restful' in the txt file
+
+In the requirements file
+"
+Flask
+flask_restful
+"
+
+In the directory containing seach of the services 'web', 'db' 
+we make a docker-compose file to control each container
+`touch docker-compose.yml`
+And in that file we write
+# To control each of the containers from a single place
+# There are many version of docker-compose
+version: '3'
+services:
+    # The first service is web
+    web:
+        # we specify the directory
+        build: ./web
+        # we map port 5000 to 5000
+        ports: 
+            - "5000:5000"
+    # db:
+    #     build: ./db
+    # web2:
+    #     build: ./web2
+
+now we do  `docker-compose build`
+Make sure Docker is running or will recieve an error
+`docker-compose up` to run the container
+
+-----------------------
+
+A database is a structured set of data held in a database
+To store something the user sends us or to calculate something from what we have stored
+Instead of computing something that gives the same result everytime we can instead store it in database
+
+Mongodb is a cross platform, document-oriented database. Works on the concept of collection and document.
+Database is a physical container for collections. Each database gets it's own set of files on the file system.
+A single mongodb server has multiple databases. 
+
+Collection is a group of mongodb documents. Same as a rdbms table. Collection exists within a single database. 
+Collections do not enforce a schema. Documents within a collection can have different fields.
+Usually all documents within a collection are of similar or related purpose. 
+
+Document is a set of key-value pairs. Documents have dynamic schema. 
+Dynamic schema means that documents in the same collection,
+do not need to have the same set of fields or structure.
+And common fields in a collections documents may hold different types of data. 
+Document has a similar schema to JSON
+
+An eg: A mongodb server can have a database, with collections. each collection can have many documents. 
+
+In an RDBMS database a table is a group of rows. In Mongodb a collection is a group of documents. 
+In an RDBMS database we have columns. In Mongodb we have fields. 
+In an RDBMS database we have table joins. In Mongodb we have embeded documents. 
+In an RDBMS database primary key is the unique key to each database. 
+In Mongodb there is a default key id which is like the primary key. Each document with its uniqe id. 
+
+
+{                                           # document 
+    _id: <ObjectId>,                         
+    username: "123xyz",
+    contact: {                              # embeded sub document 
+                phone: "123-456-7890" , 
+                email: "xyz@example.com"
+            },
+    access: {                               # embeded sub document 
+                level: 5 ,
+                group: "dev"
+            }
+}
+
+_id is a 12 bytes hexadecimal number which assumes the uniqueness of every document.
+You can provide _id while inserting the document. 
+If you don't provide then Mongodb provides a unique id for every document. 
+the 12 bytes:
+4 bytes of current stamp
+Next 3 of machine id
+Next 2 of process id of mongodb server
+Last 3 are incremental value
+
+Mongodb ease of scale out.
+Document oriented storage. 
+
+Mongodb use cases:
+Big data, 
+Content managment and delivery,
+Mobile and social infrastructure,
+User data managment,
+Data hub.
+
+`brew services start mongodb-community@4.4`
+`brew services stop mongodb-community@4.4`
+The `mongod` server
+The `mongos` sharded cluster query router
+The `mongo` shell
+
+To have launchd start mongodb/brew/mongodb-community now and restart at login:
+  brew services start mongodb/brew/mongodb-community
+Or, if you don't want/need a background service you can just run:
+  mongod --config /usr/local/etc/mongod.conf
+`mongo` to run mongodb
+`db.help()` to see all possible commands
+
+Schema is desinged by user requirements.
+Make sure there is no reason for joins. 
+Combine objects into one document only if used together otherwise seperate them.
+Duplicate data as disk space is cheap relative to compute time.
+Do joins on write but not read. 
+Optamize schema for most frequent use case. 
+Do complex agregation in schema. 
+
+Example:
+Every post has unique title, description and url.
+Every post can have one or more tags.
+Every post has name of its publisher and total number of likes.
+Every post has comments given by users along with thier names, message, data-time and likes.
+Each post can be zero or more comments.
+
+Normal RDBMS-
+comments: comment_id, post_id, by_user, message, data_time, likes
+post: id, title, description, url, likes, post_by
+tag-list: id, post_id, tag
+Can have infinite number of comments or tags to one post
+
+For Mongodb-
+{
+    _id: POST_ID ,
+    title: TITLE_OF_POST ,
+    description: POST_DESCRIPTION ,
+    by: POST_BY ,
+    url: URL_OF_POST ,
+    tags: [TAG1, TAG2, TAG3] ,
+    likes: TOTAL_LIKES ,
+    comments: [
+        {
+            user: 'COMMENT_BY' ,
+            message: TEXT ,
+            dataCreated: DATA_TIME ,
+            like: LIKES
+        },
+        {
+            user: 'COMMENT_BY' ,
+            message: TEXT ,
+            dataCreated: DATA_TIME ,
+            like: LIKES
+        }
+    ]
+
+}
+
+Crating a DB:
+`use <NAME-OF-DB>`
+To check current DB:
+`db`
+List of all DBs:  
+`show dbs`
+# If not present in list you need to have atleast one document in DB
+# to add a object `db.movie.insert({"name":"tutorial"})
+
+`db.dropDatabase()` to drop existing database, 
+to delete the selected database, if non selected then the test database by default
+`db.createCollection(<NAME>, <OPTIONS>)` to create collection
+<NAME> is name of collection to be created. 
+<OPTIONS> is a document and is used to specify configeration of collection, eg maximum num of entries.
+-->Capped is fixed size collection that automatically overites its old entries which it reaches maximum size.
+
+`show dbs`
+`use test`
+`db.createCollection("mycollection")`
+`show collections`
+eg: `db.createCollection("mycol", { capped: true, autoIndexId: true, size: 6142800, max: 10000 })`
+`db.createCollection("mycol", { capped: true, size: 3, max: 3 })`
+mongodb creates a collection automatically when you insert some document.
+`db.magicalCollection.insert({"name" : "magicalCollection"})`
+`db.mycol.drop()` to delete collection
+
+Data types:
+String, Integer, Boolean, Double, Min/Max keys( to compare against low or high BSON elements ),
+Arrays(to store list or multiple values into one key) ,
+Timestamp - ctimestamp (to record when document has been added or modified) ,
+Object - used for embeded documents,
+Null - to store null values,
+Symbol - Used identically to a string, reserved for languages that use specific symbol type (Arabic, German). 
+Date - current date or time in Unix time format. 
+Object ID - To store document's ID. 
+Binary data - to store binary data,
+Code - To store javascript code in document, 
+Regular expression - datatype used to store regular expression.
+
+To insert data into MongoDB collection, you use MongoDB's insert() or save() dethod.
+`db.<COLLECTION-NAME>.insert(document)`
+`db.mycol.insert({Username: "abc", Password: "xyz"})`
+`db.mycol.insert([{}, {}, {}, {}])`
+
+`db.COLLECTION_NAME.find({})` to query documents
+`db.COLLECTION_NAME.find({}).preety()` to query documents
+Query Fiters:
+Equality {<key>:<value>}       `db.mycol.find({"title":"MongoDB Overview"}).preety()`
+Less Than {<key>:{$lt:<value>}} `db.mycol.find({"likes":{$lt:50}}).preety()`
+Less Than Equals {<key>:{$lte:<value>}}     `db.mycol.find({"likes":{$lte:50}}).preety()`
+Greater Than {<key>:{$gt:<value>}}
+Greater Than Equals {<key>:{$gte:<value>}}
+Not Equals {<key>:{$ne:<value>}}
+
+db.mycol.find(
+    {
+        $and: [
+            {key1:value1}, {key2:value2}
+        ]
+    }
+).preety()
+db.mycol.find({$and:[{"likes":{$gte:50}}, {"title":"MongoDB Overview"}]}).preety()
+db.mycol.find({$and:[{"likes":{$gte:50}}, {"likes":{$let:100}}]}).preety()
+
+MongoDB update() method updates values in an existing document and 
+save() replaces the existing document with the document passed in save() method
+update() looks for the value and does an in place update. 
+save() replaces the entire document
+`db.<COLLECTION_NAME>.update(<SELECTION-CRITERIA>,<UPDATED-DATA>)`
+`db.mycol.update({'title':'MongoDB Overview'},{$set:{'title':'New MongoDB}})`
+By default MongoDB will only update a single document, to update all documents,
+`db.mycol.update({'title':'MongoDB Overview'},{$set:{'title':'New MongoDB}},{multi:true})`
+
+`db.<COLLECTION_NAME>.remove(DELETION_CRITERIA)`
+# justOne = 1 or True criteria to delete just single document not all
+`db.mycol.remove({"title":"MongoDB Overview})`
+`db.mycol.find()` shows all documents in collection mycol
+
+Projection to only select necessary data and not all of the data of a document.
+eg: {"_id":ObjectId(598783248985601dfd3),"title":"MongoDB Overview"}
+    {"_id":ObjectId(598783248985601dfd4),"title":"NOSQL Overview"}
+`db.find({},{"title":1,_id:0})` shows of all just the title not the id
+{"title":"MongoDB Overview"}
+{"title":"NOSQL Overview"}
+
+MongoDB limit() method to only return specified number of documents in a collection insteal of everything.
+`db.<COLLECTION_NAME>.find().limit(<NUMBER>)`
+`db.mycol.find({},{"title":1,_id:0}).limit(1)` shows
+{"title":"MongoDB Overview"}
+
+MongoDB sort() medthod to return documents in a collection in accending 1 or decending -1 order.
+`db.COLLECTION_NAME.find().sort({KEY:1})`
+`db.COLLECTION_NAME.find().sort({"likes":1})` to sort the key "likes" in accending order
+
